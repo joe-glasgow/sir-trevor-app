@@ -1,0 +1,31 @@
+{
+  "plugins": [
+    "syntax-async-functions",
+    "syntax-dynamic-import",
+    "transform-async-to-generator",
+    "transform-regenerator",
+    "transform-runtime"
+  ],
+  "presets": [
+    [
+      "env",
+      {
+        "targets": {
+          "browsers": [
+            "last 2 versions",
+            "ie >= 11"
+          ]
+        }
+      }
+    ],
+    "stage-0"
+  ],
+  "env": {
+    "test": {
+    },
+    "development": {
+    },
+    "production": {
+    }
+  }
+}
