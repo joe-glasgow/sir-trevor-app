@@ -54,7 +54,7 @@ const removeEmptyKeys = obj => {
 
 const devPlugins = () => {
 
-  if(isDev) {
+  if (isDev) {
     const manifest = path.resolve(dist, 'vendor.json');
     const indexHTML = path.resolve(src, 'index.html');
 
@@ -98,112 +98,152 @@ const devPlugins = () => {
 
 const hotPlugins = isHot
   ? [
-      new webpack.HotModuleReplacementPlugin({
-        multiStep: true, // Enable multi-pass compilation for enhanced performance in larger projects.
-      }),
-    ]
+    new webpack.HotModuleReplacementPlugin({
+      multiStep: true, // Enable multi-pass compilation for enhanced performance in larger projects.
+    }),
+  ]
   : [];
 
 const prodPlugins = isProd
   ? [
-      // Note: do not use '-p' in "build:prod" script
+    // Note: do not use '-p' in "build:prod" script
 
-      // CommonsChunk analyzes everything in your bundles, extracts common bits into files together.
-      // See: https://webpack.js.org/plugins/commons-chunk-plugin/
-      // See: https://webpack.js.org/guides/code-splitting-libraries/
-      new webpack.optimize.CommonsChunkPlugin({
-        names: ['vendor', 'manifest'],
-      }),
+    // CommonsChunk analyzes everything in your bundles, extracts common bits into files together.
+    // See: https://webpack.js.org/plugins/commons-chunk-plugin/
+    // See: https://webpack.js.org/guides/code-splitting-libraries/
+    new webpack.optimize.CommonsChunkPlugin({
+      names: ['vendor', 'manifest'],
+    }),
 
-      // Minify and optimize the index.html
-      new HtmlWebpackPlugin({
-        template: './index.html',
-        inject: true,
-        favicon: 'favicon.png',
-        // Correct bundle order: [manifest, vendor, app]
-        // see: http://stackoverflow.com/questions/36796319/webpack-with-commonschunkplugin-results-with-wrong-bundle-order-in-html-file
-        // see: https://github.com/ampedandwired/html-webpack-plugin/issues/481
-        chunksSortMode: 'dependency',
-        xhtml: true,
-        minify: {
-          removeComments: true,
-          collapseWhitespace: true,
-          removeRedundantAttributes: true,
-          useShortDoctype: true,
-          removeEmptyAttributes: true,
-          removeStyleLinkTypeAttributes: true,
-          keepClosingSlash: true,
-          minifyJS: true,
-          minifyCSS: true,
-          minifyURLs: true,
-        },
-      }),
+    // Minify and optimize the index.html
+    new HtmlWebpackPlugin({
+      template: './index.html',
+      inject: true,
+      favicon: 'favicon.png',
+      // Correct bundle order: [manifest, vendor, app]
+      // see: http://stackoverflow.com/questions/36796319/webpack-with-commonschunkplugin-results-with-wrong-bundle-order-in-html-file
+      // see: https://github.com/ampedandwired/html-webpack-plugin/issues/481
+      chunksSortMode: 'dependency',
+      xhtml: true,
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+        removeRedundantAttributes: true,
+        useShortDoctype: true,
+        removeEmptyAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        keepClosingSlash: true,
+        minifyJS: true,
+        minifyCSS: true,
+        minifyURLs: true,
+      },
+    }),
 
-      // Merge all duplicate modules
-      // No longer needed; default in webpack2
-      //new webpack.optimize.DedupePlugin(),
+    // Merge all duplicate modules
+    // No longer needed; default in webpack2
+    //new webpack.optimize.DedupePlugin(),
 
-      new webpack.LoaderOptionsPlugin({
-        minimize: true,
-        debug: false,
-        quiet: true
-      }),
+    new webpack.LoaderOptionsPlugin({
+      minimize: true,
+      debug: false,
+      quiet: true
+    }),
 
-      new webpack.optimize.UglifyJsPlugin({
-        compress: {
-          unused: true,    // Enables tree shaking
-          dead_code: true, // Enables tree shaking
-          pure_getters: true,
-          warnings: false,
-          screw_ie8: true,
-          conditionals: true,
-          comparisons: true,
-          sequences: true,
-          evaluate: true,
-          join_vars: true,
-          if_return: true,
-        },
-        output: {
-          comments: false
-        },
-        sourceMap: true
-      }),
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        unused: true,    // Enables tree shaking
+        dead_code: true, // Enables tree shaking
+        pure_getters: true,
+        warnings: false,
+        screw_ie8: true,
+        conditionals: true,
+        comparisons: true,
+        sequences: true,
+        evaluate: true,
+        join_vars: true,
+        if_return: true,
+      },
+      output: {
+        comments: false
+      },
+      sourceMap: true
+    }),
 
-      // Remove unused CSS, see: https://github.com/vseventer/uncss-webpack-plugin
-      //new UnCSSPlugin({ /* options */ }),
-    ]
+    // Remove unused CSS, see: https://github.com/vseventer/uncss-webpack-plugin
+    //new UnCSSPlugin({ /* options */ }),
+  ]
   : [];
 
 // See: https://github.com/rstacruz/webpack-tricks/blob/master/recipes/css.md
 // See: https://github.com/rstacruz/webpack-starter-kit
 const cssRules = isHot
   ? [
-      {
-        // Enables HMR. Inlines CSS in html head style tag
-        test: /\.css|\.scss$/,
-        include: [
-          src,
-          path.resolve(process.cwd(), 'node_modules')
-        ],
+    {
+      // Enables HMR. Inlines CSS in html head style tag
+      test: /\.css|\.scss$/,
+      include: [
+        src,
+        path.resolve(process.cwd(), 'node_modules')
+      ],
+      use: [
+        'style-loader',
+        {
+          loader: 'css-loader',
+
+          // Uncomment options if you don't want inlines CSS (HMR works for both)
+          /*
+           options: {
+           url: true,
+           sourceMap: true,
+           importLoaders: 1
+           }
+           */
+        },
+        {
+          loader: 'postcss-loader',
+          options: {
+            sourceMap: 'inline',
+          }
+        },
+        {
+          loader: 'resolve-url-loader'
+        },
+        {
+          loader: 'sass-loader',
+          query: {
+            sourceMap: 'expanded'
+          }
+        },
+      ]
+    }
+  ]
+  : [
+    {
+      test: /\.css|\.scss$/,
+      include: [
+        src,
+        path.resolve(process.cwd(), 'node_modules')
+      ],
+      use: ExtractTextPlugin.extract({
+        fallback: 'style-loader',
         use: [
-          'style-loader',
           {
             loader: 'css-loader',
-
-            // Uncomment options if you don't want inlines CSS (HMR works for both)
-            /*
-            options: {
-              url: true,
-              sourceMap: true,
-              importLoaders: 1
-            }
-            */
+            options: isDev
+              ? {
+                url: true,
+                sourceMap: true,
+                importLoaders: 1
+              }
+              : {
+                url: true
+              }
           },
           {
             loader: 'postcss-loader',
-            options: {
-              sourceMap: 'inline',
-            }
+            options: isDev
+              ? {sourceMap: 'inline'}
+              : {}
           },
           {
             loader: 'resolve-url-loader'
@@ -211,53 +251,13 @@ const cssRules = isHot
           {
             loader: 'sass-loader',
             query: {
-              sourceMap: 'expanded'
+              sourceMap: isProd ? 'compressed' : 'expanded'
             }
           },
         ]
-      }
-    ]
-  : [
-      {
-        test: /\.css|\.scss$/,
-        include: [
-          src,
-          path.resolve(process.cwd(), 'node_modules')
-        ],
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: [
-            {
-              loader: 'css-loader',
-              options: isDev
-                ? {
-                    url: true,
-                    sourceMap: true,
-                    importLoaders: 1
-                  }
-                : {
-                    url: true
-                  }
-            },
-            {
-              loader: 'postcss-loader',
-              options: isDev
-                ? { sourceMap: 'inline' }
-                : {}
-            },
-            {
-              loader: 'resolve-url-loader'
-            },
-            {
-              loader: 'sass-loader',
-              query: {
-                sourceMap: isProd ? 'compressed' : 'expanded'
-              }
-            },
-          ]
-        })
-      },
-    ];
+      })
+    },
+  ];
 
 module.exports = {
   context: context,
@@ -276,15 +276,16 @@ module.exports = {
     chunks: false,
     assetsSort: 'name',
   },
-  cache:   !isProd,
-  bail:    isProd,  // Don't attempt to continue if there are any errors.
-  target:  'web',   // Make web variables accessible to webpack, e.g. window. This is a default value; just be aware of it
+  cache: !isProd,
+  bail: isProd,  // Don't attempt to continue if there are any errors.
+  target: 'web',   // Make web variables accessible to webpack, e.g. window. This is a default value; just be aware of it
   resolve: {
     modules: [
       'src',
       'node_modules',
     ],
-    extensions: ['.js', '.jsx', '.json', '.css', '.sass', '.scss', '.html']
+    extensions: ['.js', '.jsx', '.json', '.css', '.sass', '.scss', '.html'],
+    alias: { '../src/icons/sir-trevor-icons.svg' : 'assets/sir-trevor-icons.svg' }
   },
   entry: removeEmptyKeys({
     // Correct bundle order: [manifest, vendor, app]
@@ -293,21 +294,21 @@ module.exports = {
     vendor: isProd ? ['./vendor.js'] : [],
     app: (isHot
       ? [
-          // Dynamically set the webpack public path at runtime below
-          // Must be first entry to properly set public path
-          // See: http://webpack.github.io/docs/configuration.html#output-publicpath
-          // NOTE: Not shure if this is really needed. Seems to work OK without
-          //'./webpack-public-path.js',
+        // Dynamically set the webpack public path at runtime below
+        // Must be first entry to properly set public path
+        // See: http://webpack.github.io/docs/configuration.html#output-publicpath
+        // NOTE: Not shure if this is really needed. Seems to work OK without
+        //'./webpack-public-path.js',
 
-          'webpack-hot-middleware/client',
+        'webpack-hot-middleware/client',
 
-          // reload - Set to true to auto-reload the page when webpack gets stuck.
-          //'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000&reload=true',
+        // reload - Set to true to auto-reload the page when webpack gets stuck.
+        //'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000&reload=true',
 
-          // You can use full urls, like:
-          //`webpack-hot-middleware/client?http://${host}:${port}${publicPath}`
-          // Remember to update path in ./server/index.js - see: Step 3 in ./server/index.js
-        ]
+        // You can use full urls, like:
+        //`webpack-hot-middleware/client?http://${host}:${port}${publicPath}`
+        // Remember to update path in ./server/index.js - see: Step 3 in ./server/index.js
+      ]
       : [])
       .concat([
         './index.js',
@@ -327,6 +328,17 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /sir-trevor\.js$/,
+        loader: 'string-replace-loader',
+        exclude: [src],
+        include: [/node_modules/],
+        query: {
+          search: '../src/icons/sir-trevor-icons.svg',
+          replace: 'assets/sir-trevor-icons.svg',
+          strict: true,
+        }
+      },
       {
         test: /\.js[x]?$/,
         enforce: 'pre',
@@ -440,7 +452,7 @@ module.exports = {
 
     new CopyWebpackPlugin([
       //{ from: 'favicon.png' },
-      { from: 'assets', to: 'assets' }
+      {from: 'assets', to: 'assets'}
     ]),
 
     // Module ids are full names

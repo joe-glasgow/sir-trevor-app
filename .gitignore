@@ -3,6 +3,7 @@
 build/
 bundle/
 dist/
+uploads/
 errorShots/
 logs/
 *.log

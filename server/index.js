@@ -28,6 +28,16 @@ const port = webpackCfg.devServer.port;
 const publicPath = webpackCfg.devServer.publicPath;
 const apiPath = process.env.API_PATH || argv['api-path'] || appCfg.server.apiPath || '/api';
 
+//upload
+const multer = require('multer'); // v1.0.5
+const storage = multer.diskStorage({ destination : 'uploads/' ,
+  filename: function (req, file, cb) {
+    cb(null, (Math.random().toString(36)+'00000000000000000').slice(2, 10) + Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage }); // for parsing multipart/form-data
+
 const isProxy = argv.proxy || false;
 let proxyHost;
 let proxyPort;
@@ -119,6 +129,15 @@ if (isDev || isHot) {
   }
 
   app.use(publicPath, express.static(webpackCfg.context));
+  // posting
+  app.post('/attachments', upload.single('attachment[file]'), (req,res) => {
+    const { info } = logger;
+    if (req.file) {
+      info(JSON.stringify(res.file));
+      res.json({ file: { url: '/' + req.file.path } });
+    }
+    res.end('successful');
+  });
 
   app.get(/\.dll\.js$/, (req, res) => {
     const filename = req.path.startsWith(publicPath)
@@ -129,6 +148,8 @@ if (isDev || isHot) {
 
     res.sendFile(path.join(compiler.outputPath, filename));
   });
+
+  // sir trevor icon
 
   // Since webpackDevMiddleware uses memory-fs internally to store build
   // artifacts, we use it instead

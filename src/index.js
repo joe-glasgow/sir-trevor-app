@@ -3,7 +3,6 @@ import './config/config';
 import logger, {LOG_LEVEL} from './logger/logger';
 import run from './app/app';
 import './styles.scss';
-
 if(window) {
   /**
    * An event handler for the error event.
