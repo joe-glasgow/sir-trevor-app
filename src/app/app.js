@@ -8,12 +8,13 @@ const run = () => {
   const editor = new SirTrevor.Editor({
     el: document.querySelector('.js-st-instance'),
     defaultType: 'Text',
-    iconUrl: './assets/sir-trevor-icons.svg'
+    iconUrl: './assets/sir-trevor-icons.svg',
+    blockTypes: ['Text', 'Tweet', 'Image', 'Video', 'Quote', 'Heading', 'List']
   });
 
   editor.initialize({ iconUrl: 'assets/sir-trevor-icons.svg'});
 
-  console.log(editor.options.iconUrl);
+  console.log(editor.options);
 
   // Remove the most recently-added event handlers so that when the code runs again and
   // adds a new event handler, we don't end up with duplicate handlers.
